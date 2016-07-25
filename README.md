@@ -71,11 +71,9 @@ Let's make it more interesting...
 
 We can now get more clever with our traversals. For example, "Do people who write awesome in their reviews actual rate things as such?"
 
-`g.V().has('review','summary', Search.tokenRegex('awesome')).values('overall').mean()
-`
+`g.V().has('review','summary', Search.tokenRegex('awesome')).values('overall').mean()`
 
-![Alt text](http://i.imgur.com/PPgDx4k.png)
-
+Spoiler...Yes they do! 
 
 Using similar logic - which ones are getting reviewed the most?
 
