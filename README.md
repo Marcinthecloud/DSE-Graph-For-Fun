@@ -1,4 +1,4 @@
-# DSE Graph Loader Example
+# DSE Graph For Fun!
 ![Alt text](https://upload.wikimedia.org/wikipedia/en/d/d3/Datastax_Logo.png)
 
 This demo is intended to help get you started with DSE Graph. It includes schemas, data, and mapper script for the DataStax Graph Loader. A *special* thanks to Shaunak Das for helping with the mapper_script.
