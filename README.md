@@ -56,7 +56,7 @@ If everything works, you'll see no errors and the output may show some suggested
 
 
 #####Now let's play around. Remember that Studio truncates results to 1000 by default.
-*Note - most of these are stupid and inefficient traversals. Traverse responsibly*
+*Note - some of these are stupid and inefficient traversals. Traverse responsibly*
 
 
 `g.V()`
