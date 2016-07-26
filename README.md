@@ -3,7 +3,7 @@
 
 This demo is intended to help get you started with DSE Graph. It includes schemas, data, and mapper script for the DataStax Graph Loader. A *special* thanks to Shaunak Das for helping with the mapper_script.
 
-#####About the Data
+###About the Data
 The data in this Git is only a small taste of what you can load with this script. This contains musical instrument product metadata and the respective reviews.
 
 Larger datasets can be found here: http://jmcauley.ucsd.edu/data/amazon/
@@ -20,7 +20,7 @@ J. McAuley, R. Pandey, J. Leskovec
 Knowledge Discovery and Data Mining, 2015
 
 
-#####Prerequisites
+###Prerequisites
 * [Learn some Graph](https://academy.datastax.com/courses/ds330-datastax-enterprise-graph) <- this will give you ideas on how to query this graph
 * [DataStax Graph Loader](https://academy.datastax.com/downloads/download-drivers)
 * [DataStax Enterprise 5.0 or greater](https://www.datastax.com/downloads)
@@ -28,14 +28,14 @@ Knowledge Discovery and Data Mining, 2015
 * [Download the data (too large for GitHub)](https://drive.google.com/folderview?id=0B2STJKKPFt84WF8xUThYV0FKU2s&usp=sharing)
 
 
-#####How-to:
+###How-to:
 1. Start DataStax Enterprise in graph mode mode
 2. Start DataStax Studio (port 9091)
 3. Edit ```data_mapper.groovy``` so that the paths for the two files = `'/path/to/this/directory/'`
 
-#####Next, we'll want to create the graph and schemas
+###Next, we'll want to create the graph and schemas
 
-#####In DataStax Studio create a new connection with a graph called 'product_graph':
+#####In DataStax Studio create a new connection with a graph called 'product_graph'
 
 #####Next, paste the schema from the `schema.groovy` file into a new gremlin box:
 
@@ -50,12 +50,12 @@ Note, there's plenty of other connections we can make with this dataset. Feel fr
 
 If everything works, you'll see no errors and the output may show some suggested schemas. We're going to ignore those for now.
 
-#####Now we're going to load the data
+###Now we're going to load the data
 
 `graphloader /path/to/data_mapper.groovy -graph product_graph -address localhost`
 
 
-#####Now let's play around. Remember that Studio truncates results to 1000 by default.
+###Now let's play around. Remember that Studio truncates results to 1000 by default.
 *Note - some of these are stupid and inefficient traversals. Traverse responsibly*
 
 
