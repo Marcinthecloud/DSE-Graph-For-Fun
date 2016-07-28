@@ -33,13 +33,17 @@ Knowledge Discovery and Data Mining, 2015
 2. Start DataStax Studio (port 9091)
 3. Edit ```data_mapper.groovy``` so that the paths for the two files = `'/path/to/this/directory/'`
 
-###Next, we'll want to create the graph and schemas
+##Let's get started
 
 #####In DataStax Studio create a new connection with a graph called 'product_graph'
+![Alt text](http://i.imgur.com/zNrR722.png)
 
 #####Next, paste the schema from the `schema.groovy` file into a new gremlin box:
+![Alt text](http://i.imgur.com/HvcCyio.png)
 
 #####Click the `real-time` play button to execute. When it finishes, hit the `schema` button at the top right of Studo. It should look like:
+![Alt text](http://i.imgur.com/kpiCYDk.png)
+
 Note, there's plenty of other connections we can make with this dataset. Feel free to explore and play around!
 
 
