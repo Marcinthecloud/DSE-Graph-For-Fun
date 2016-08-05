@@ -1,4 +1,5 @@
 //Created by Marc Selwan (marc.selwan@datastax.com) and Shaunak Das at DataStax
+//Have fun!
 
 config create_schema: false, load_new: false, load_threads: 3
 
