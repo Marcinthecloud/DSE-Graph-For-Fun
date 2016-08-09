@@ -30,6 +30,9 @@ schema.vertexLabel("customer").properties("reviewerID", "reviewerName").create()
 schema.edgeLabel("customer_reviewed").multiple().properties("unixReviewTime", "reviewerName", "overall", "asin", "helpful", "reviewText", "reviewTime", "summary", "reviewerID").create()
 schema.edgeLabel("customer_reviewed").connection("customer", "product").add()
 
+//customer -(customer_made)-> review
+schema.edgeLabel('customer_made').connection('customer', 'review').create()
+
 //product -(belongs_in_category)-> category
 schema.edgeLabel("belongs_in_category").multiple().create()
 schema.edgeLabel("belongs_in_category").connection("product", "category").add()
