@@ -21,6 +21,7 @@ schema.propertyKey("brand").type(java.lang.String).single().create()
 
 schema.vertexLabel("product").properties("title", "imUrl", "price", "asin", "brand", "description").create()
 schema.vertexLabel("review").properties("unixReviewTime", "reviewerName", "overall", "asin", "helpful", "reviewText", "reviewTime", "summary", "reviewerID").create()
+
 schema.vertexLabel("category").properties("categories").create()
 schema.vertexLabel("customer").properties("reviewerID", "reviewerName", "asin").create()
 
@@ -43,6 +44,7 @@ schema.edgeLabel('customer_made').connection('customer', 'review').create()
 schema.edgeLabel("belongs_in_category").multiple().create()
 schema.edgeLabel("belongs_in_category").connection("product", "category").add()
 
+
 //product -(purchased_with)-> product
 schema.edgeLabel('purchased_with').connection('product', 'product').create()
 
@@ -57,6 +59,8 @@ schema.edgeLabel('has_salesRank').properties('rank').add()
 //product -(has_review)-> reivew
 schema.edgeLabel("has_review").multiple().properties("asin").create()
 schema.edgeLabel('has_review').connection('product', 'review').add()
+schema.edgeLabel('has_reivew').connection('product', 'review').create()
+
 
 //product -(bought_after_viewing)-> product
 schema.edgeLabel('bought_after_viewing').connection('product', 'product').create()

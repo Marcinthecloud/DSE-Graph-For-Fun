@@ -24,7 +24,6 @@ meta_data = File.json(productData).gzip().transform{
 	it
 }
 
-
 review_data = File.json(reviewData).gzip().transform{
     it['edge_keys'] = []
     it['edge_keys'].add(['asin': it['asin'],
@@ -37,13 +36,19 @@ review_data = File.json(reviewData).gzip().transform{
                          'unixReviewTime': it['unixReviewTime']
                         ]);
     it
-}
+	}
+
+
 
 //create customer vertexLabel
 customerV = {
     label "customer"
     key "reviewerID"
 
+		outV "reviewerID","customer_made", {
+				label "review"
+				key "reviewerID"
+		}
 		//Customer -(customer_reviewed)-> Item
     outV "edge_keys", "customer_reviewed", {
         label "product"
@@ -59,11 +64,6 @@ customerV = {
 					 ignore "reviewerID"
         }
     }
-		outV "edge_keys", "customer_made", {
-        label "review"
-        key "reviewerID"
-    }
-
 
 		//ignore "asin" //asin is the link between customer to product. Think more like an invoice
     ignore "helpful"
@@ -108,9 +108,8 @@ productV = {
         }
     }
 
-		outE "has_reivew", {
-			vertex "asin", {
-				 label "review"
+		outV "asin", "has_reivew", {
+				  label "review"
 				  key "asin"
 					ignore "related"
 					ignore "categories"
@@ -120,9 +119,6 @@ productV = {
 					ignore "rank"
 					ignore "brand"
 					ignore "imgUrl"
-
-
-			}
 		}
 
 
@@ -136,9 +132,17 @@ reviewV = {
     label "review"
     key "asin"
 
-		outV "edge_keys", "belongs_to_product", {
+		outV "asin", "belongs_to_product", {
         label "product"
         key "asin"
+				ignore "reviewerID"
+				ignore "reviewText"
+				ignore "helpful"
+				ignore "overall"
+				ignore "reviewText"
+				ignore "reviewTime"
+				ignore "summary"
+				ignore "unixReviewTime"
     }
 
 		outE "edge_keys", "made_by", {
@@ -146,7 +150,12 @@ reviewV = {
 					 label "customer"
 					 key "reviewerID"
 					 ignore "reviewText"
-					 ignore "reviewerID"
+					 ignore "helpful"
+					 ignore "overall"
+					 ignore "reviewText"
+					 ignore "reviewTime"
+					 ignore "summary"
+					 ignore "unixReviewTime"
 				}
 		}
 	}
