@@ -44,7 +44,7 @@ customerV = {
     label "customer"
     key "reviewerID"
 
-		// Customer -(reviewed)-> Item
+		//Customer -(customer_reviewed)-> Item
     outV "edge_keys", "customer_reviewed", {
         label "product"
         key "asin"
@@ -64,7 +64,8 @@ customerV = {
         key "reviewerID"
     }
 
-		ignore "asin"
+
+		//ignore "asin" //asin is the link between customer to product. Think more like an invoice
     ignore "helpful"
 		ignore "overall"
 		ignore "reviewText"
@@ -74,7 +75,7 @@ customerV = {
 
 }
 
-// // create product VertexLabel
+// create product VertexLabel
 productV = {
     label "product"
     key "asin"
@@ -107,6 +108,23 @@ productV = {
         }
     }
 
+		outE "has_reivew", {
+			vertex "asin", {
+				 label "review"
+				  key "asin"
+					ignore "related"
+					ignore "categories"
+					ignore "salesRank"
+					ignore "price"
+					ignore "title"
+					ignore "rank"
+					ignore "brand"
+					ignore "imgUrl"
+
+
+			}
+		}
+
 
     // these keys can be ignored, since we did appropriate transform on original JSON
     ignore "related"
@@ -114,6 +132,27 @@ productV = {
     ignore "salesRank"
 }
 
+reviewV = {
+    label "review"
+    key "asin"
+
+		outV "edge_keys", "belongs_to_product", {
+        label "product"
+        key "asin"
+    }
+
+		outE "edge_keys", "made_by", {
+				vertex "reviewerID", {
+					 label "customer"
+					 key "reviewerID"
+					 ignore "reviewText"
+					 ignore "reviewerID"
+				}
+		}
+	}
+
+
 //time to actually load the data
 load(review_data).asVertices(customerV)
+load(review_data).asVertices(reviewV)
 load(meta_data).asVertices(productV)
