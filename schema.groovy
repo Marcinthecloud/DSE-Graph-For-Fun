@@ -22,7 +22,7 @@ schema.propertyKey("brand").type(java.lang.String).single().create()
 schema.vertexLabel("product").properties("title", "imUrl", "price", "asin", "brand", "description").create()
 schema.vertexLabel("review").properties("unixReviewTime", "reviewerName", "overall", "asin", "helpful", "reviewText", "reviewTime", "summary", "reviewerID").create()
 schema.vertexLabel("category").properties("categories").create()
-schema.vertexLabel("customer").properties("reviewerID", "reviewerName").create()
+schema.vertexLabel("customer").properties("reviewerID", "reviewerName", "asin").create()
 
 //Define our edges
 
