@@ -59,7 +59,6 @@ schema.edgeLabel('has_salesRank').properties('rank').add()
 //product -(has_review)-> reivew
 schema.edgeLabel("has_review").multiple().properties("asin").create()
 schema.edgeLabel('has_review').connection('product', 'review').add()
-schema.edgeLabel('has_reivew').connection('product', 'review').create()
 
 
 //product -(bought_after_viewing)-> product

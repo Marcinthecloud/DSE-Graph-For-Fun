@@ -108,7 +108,7 @@ productV = {
         }
     }
 
-		outV "asin", "has_reivew", {
+		outV "asin", "has_review", {
 				  label "review"
 				  key "asin"
 					ignore "related"
