@@ -42,7 +42,7 @@ Knowledge Discovery and Data Mining, 2015
 ![Alt text](http://i.imgur.com/HvcCyio.png)
 
 #####Click the `real-time` play button to execute. When it finishes, hit the `schema` button at the top right of Studo. It should look like:
-![Alt text](http://i.imgur.com/kpiCYDk.png)
+![Alt text](http://i.imgur.com/jRDwRkP.png)
 
 Note, there's plenty of other connections we can make with this dataset. Feel free to explore and play around!
 
