@@ -3,8 +3,8 @@
 
 config create_schema: false, load_new: false, load_threads: 3
 
-productData = '/path/to/DSEGraphDemo/meta_music.json.gz'
-reviewData = '/path/to/DSEGraphDemo/reviews_Musical_Instruments.json.gz'
+productData = '/path/to/DSEGraphData/meta_music.json.gz'
+reviewData = '/path/to/DSEGraphData/reviews_Musical_Instruments.json.gz'
 
 meta_data = File.json(productData).gzip().transform{
 	if (it.containsKey("related")){
@@ -44,7 +44,7 @@ review_data = File.json(reviewData).gzip().transform{
 customerV = {
     label "customer"
     key "reviewerID"
-
+		// customer -(customer_made)-> review
 		outV "reviewerID","customer_made", {
 				label "review"
 				key "reviewerID"
@@ -56,6 +56,7 @@ customerV = {
 				ignore "reviewText"
 				ignore "reviewerID"
     }
+    //inserting propertyKeys
     outE "edge_keys", "customer_reviewed", {
         vertex "asin", {
            label "product"
@@ -131,7 +132,7 @@ productV = {
 reviewV = {
     label "review"
     key "asin"
-
+		// review -(belongs_to_product)-> product
 		outV "asin", "belongs_to_product", {
         label "product"
         key "asin"
@@ -144,7 +145,7 @@ reviewV = {
 				ignore "summary"
 				ignore "unixReviewTime"
     }
-
+		// review -(made_by)-> customer
 		outE "edge_keys", "made_by", {
 				vertex "reviewerID", {
 					 label "customer"
@@ -161,7 +162,7 @@ reviewV = {
 	}
 
 
-//time to actually load the data
+//time to actually load and transform the data
 load(review_data).asVertices(customerV)
 load(review_data).asVertices(reviewV)
 load(meta_data).asVertices(productV)
