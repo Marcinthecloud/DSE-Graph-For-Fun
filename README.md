@@ -41,7 +41,7 @@ Knowledge Discovery and Data Mining, 2015
 #####Next, paste the schema from the `schema.groovy` file into a new gremlin box:
 ![Alt text](http://i.imgur.com/HvcCyio.png)
 
-#####Click the `real-time` play button to execute. When it finishes, hit the `schema` button at the top right of Studo. It should look like:
+#####Click the `real-time` play button to execute. When it finishes, hit the `schema` button at the top right of Studo. It should look something like, give or take an edge:
 ![Alt text](http://i.imgur.com/jRDwRkP.png)
 
 Note, there's plenty of other connections we can make with this dataset. Feel free to explore and play around!
