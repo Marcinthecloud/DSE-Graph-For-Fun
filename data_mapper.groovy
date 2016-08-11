@@ -150,6 +150,7 @@ reviewV = {
 				vertex "reviewerID", {
 					 label "customer"
 					 key "reviewerID"
+					 ignore "asin"
 					 ignore "reviewText"
 					 ignore "helpful"
 					 ignore "overall"

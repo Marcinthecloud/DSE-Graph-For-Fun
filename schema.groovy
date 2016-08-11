@@ -32,7 +32,7 @@ schema.edgeLabel("customer_reviewed").multiple().properties("unixReviewTime", "r
 schema.edgeLabel("customer_reviewed").connection("customer", "product").add()
 
 //review -(made_by)-> customer
-schema.edgeLabel('made_by').properties('asin').connection('review', 'customer').create()
+schema.edgeLabel('made_by').properties('reviewerID').connection('review', 'customer').create()
 
 //review -(belongs_to)-> product
 schema.edgeLabel('belongs_to_product').properties('asin').connection('review', 'product').create()
