@@ -42,7 +42,7 @@ Knowledge Discovery and Data Mining, 2015
 ![Alt text](http://i.imgur.com/HvcCyio.png)
 
 #####Click the `real-time` play button to execute. When it finishes, hit the `schema` button at the top right of Studo. It should look something like, give or take an edge:
-![Alt text](http://i.imgur.com/jRDwRkP.png)
+![Alt text](http://i.imgur.com/JcuEdj2.png)
 
 Note, there's plenty of other connections we can make with this dataset. Feel free to explore and play around!
 
@@ -77,7 +77,7 @@ We can now get more clever with our traversals. For example, "Do people who writ
 
 `g.V().has('review','summary', Search.tokenRegex('awesome')).values('overall').mean()`
 
-Spoiler...Yes they do! 
+Spoiler...Yes they do!
 
 Using similar logic - which ones are getting reviewed the most?
 

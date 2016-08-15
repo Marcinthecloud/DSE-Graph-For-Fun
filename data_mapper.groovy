@@ -1,12 +1,18 @@
 //Created by Marc Selwan (marc.selwan@datastax.com) and Shaunak Das at DataStax
-//Have fun!
 
 config create_schema: false, load_new: false, load_threads: 3
 
-productData = '/path/to/DSEGraphData/meta_music.json.gz'
-reviewData = '/path/to/DSEGraphData/reviews_Musical_Instruments.json.gz'
+productData = '/path/to/meta.json.gz'
+reviewData = '/path/to/reviews.json.gz'
+questionData = '/path/to/qa.json.gz'
+
+question_data = File.json(questionData).gzip()
 
 meta_data = File.json(productData).gzip().transform{
+	it['key'] = [];
+	if (it.containsKey("asin")){
+		it['key'].add(['asin': it['asin']]);
+	}
 	if (it.containsKey("related")){
 		it['also_bought'] = it['related']['also_bought'];
 		it['also_viewed'] = it['related']['also_viewed'];
@@ -33,6 +39,7 @@ review_data = File.json(reviewData).gzip().transform{
                          'summary': it['summary'],
                          'reviewTime': it['reviewTime'],
 												 'reviewerID': it['reviewerID'],
+												 'reviewerName': it['reviewerName'],
                          'unixReviewTime': it['unixReviewTime']
                         ]);
     it
@@ -43,20 +50,16 @@ review_data = File.json(reviewData).gzip().transform{
 //create customer vertexLabel
 customerV = {
     label "customer"
-    key "reviewerID"
-		// customer -(customer_made)-> review
-		outV "reviewerID","customer_made", {
-				label "review"
-				key "reviewerID"
-		}
-		//Customer -(customer_reviewed)-> Item
+    key "asin"
+
+
+		//customer -(customer_reviewed)-> product
     outV "edge_keys", "customer_reviewed", {
         label "product"
         key "asin"
 				ignore "reviewText"
 				ignore "reviewerID"
     }
-    //inserting propertyKeys
     outE "edge_keys", "customer_reviewed", {
         vertex "asin", {
            label "product"
@@ -109,17 +112,20 @@ productV = {
         }
     }
 
-		outV "asin", "has_review", {
-				  label "review"
-				  key "asin"
-					ignore "related"
-					ignore "categories"
-					ignore "salesRank"
-					ignore "price"
-					ignore "title"
-					ignore "rank"
-					ignore "brand"
-					ignore "imgUrl"
+
+		outE "key", "has_review", {
+			    vertex "asin", {
+				      label "review"
+				      key "asin"
+					    ignore "related"
+							ignore "categories"
+							ignore "salesRank"
+							ignore "price"
+							ignore "title"
+							ignore "rank"
+							ignore "brand"
+							ignore "imgUrl"
+				}
 		}
 
 
@@ -132,25 +138,17 @@ productV = {
 reviewV = {
     label "review"
     key "asin"
-		// review -(belongs_to_product)-> product
-		outV "asin", "belongs_to_product", {
-        label "product"
-        key "asin"
-				ignore "reviewerID"
-				ignore "reviewText"
-				ignore "helpful"
-				ignore "overall"
-				ignore "reviewText"
-				ignore "reviewTime"
-				ignore "summary"
-				ignore "unixReviewTime"
-    }
-		// review -(made_by)-> customer
+
+		// inV "edge_keys", "customer_made", {
+		// 		label "review"
+		// 		key "reviewerID"
+		// }
+
+
 		outE "edge_keys", "made_by", {
 				vertex "reviewerID", {
 					 label "customer"
 					 key "reviewerID"
-					 ignore "asin"
 					 ignore "reviewText"
 					 ignore "helpful"
 					 ignore "overall"
@@ -162,8 +160,19 @@ reviewV = {
 		}
 	}
 
+questionV = {
+	  //load property keys in
+    label "question"
+		key "asin"
+    inV "asin", "has_question",{
+        label "product"
+        key "asin"
+    }
+}
 
-//time to actually load and transform the data
+
+//time to actually load the data
 load(review_data).asVertices(customerV)
 load(review_data).asVertices(reviewV)
+load(question_data).asVertices(questionV)
 load(meta_data).asVertices(productV)

@@ -15,15 +15,24 @@ schema.propertyKey("reviewText").Text().single().create()
 schema.propertyKey("reviewTime").Text().single().create()
 schema.propertyKey("description").type(java.lang.String).single().create()
 schema.propertyKey("brand").type(java.lang.String).single().create()
-
+schema.propertyKey("questionType").Text().single().create()
+schema.propertyKey("answerType").Text().single().create()
+schema.propertyKey("answerTime").Text().single().create()
+schema.propertyKey("unixTime").Timestamp().single().create()
+schema.propertyKey("question").Text().single().create()
+schema.propertyKey("answer").Text().single().create()
 
 //Define our Vertexes
+
+schema.vertexLabel("question").properties("asin", "questionType", "answerType", "answerTime", "unixTime", "question", "answer").create()
 
 schema.vertexLabel("product").properties("title", "imUrl", "price", "asin", "brand", "description").create()
 schema.vertexLabel("review").properties("unixReviewTime", "reviewerName", "overall", "asin", "helpful", "reviewText", "reviewTime", "summary", "reviewerID").create()
 
 schema.vertexLabel("category").properties("categories").create()
 schema.vertexLabel("customer").properties("reviewerID", "reviewerName", "asin").create()
+
+
 
 //Define our edges
 
@@ -34,16 +43,12 @@ schema.edgeLabel("customer_reviewed").connection("customer", "product").add()
 //review -(made_by)-> customer
 schema.edgeLabel('made_by').properties('reviewerID').connection('review', 'customer').create()
 
-//review -(belongs_to)-> product
-schema.edgeLabel('belongs_to_product').properties('asin').connection('review', 'product').create()
-
-//customer -(customer_made)-> review
-schema.edgeLabel('customer_made').connection('customer', 'review').create()
-
 //product -(belongs_in_category)-> category
 schema.edgeLabel("belongs_in_category").multiple().create()
 schema.edgeLabel("belongs_in_category").connection("product", "category").add()
 
+//product -(has_question)->question
+schema.edgeLabel('has_question').properties('asin').connection('product', 'question').create()
 
 //product -(purchased_with)-> product
 schema.edgeLabel('purchased_with').connection('product', 'product').create()
@@ -72,7 +77,9 @@ schema.vertexLabel("review").index("byasin").materialized().by("asin").add()
 schema.vertexLabel("category").index("bycategories").materialized().by("categories").add()
 schema.vertexLabel("review").index("byreviewerID").materialized().by("reviewerID").add()
 schema.vertexLabel('customer').index('byreviewerID').materialized().by('reviewerID').add()
-
+schema.vertexLabel('question').index('byasin').materialized().by('asin').add()
+schema.vertexLabel('customer').index('byasin').materialized().by('asin').add()
 
 //Define our Search indexes for flexability
 schema.vertexLabel('review').index('search').search().by('reviewText').asText().by('summary').asText().by('reviewerName').asString().add()
+schema.vertexLabel('question').index('search').search().by('question').asText().by('answer').asText().add()
