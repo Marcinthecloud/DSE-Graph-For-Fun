@@ -39,7 +39,6 @@ review_data = File.json(reviewData).gzip().transform{
                          'summary': it['summary'],
                          'reviewTime': it['reviewTime'],
 												 'reviewerID': it['reviewerID'],
-												 'reviewerName': it['reviewerName'],
                          'unixReviewTime': it['unixReviewTime']
                         ]);
     it
@@ -50,22 +49,17 @@ review_data = File.json(reviewData).gzip().transform{
 //create customer vertexLabel
 customerV = {
     label "customer"
-    key "asin"
+    key "reviewerID"
 
 
 		//customer -(customer_reviewed)-> product
-    outV "edge_keys", "customer_reviewed", {
-        label "product"
-        key "asin"
-				ignore "reviewText"
-				ignore "reviewerID"
-    }
+
     outE "edge_keys", "customer_reviewed", {
         vertex "asin", {
            label "product"
            key "asin"
-					 ignore "reviewText"
-					 ignore "reviewerID"
+					 //ignore "reviewText"
+					 //ignore "reviewerID"
         }
     }
 
@@ -117,14 +111,14 @@ productV = {
 			    vertex "asin", {
 				      label "review"
 				      key "asin"
-					    ignore "related"
-							ignore "categories"
-							ignore "salesRank"
-							ignore "price"
-							ignore "title"
-							ignore "rank"
-							ignore "brand"
-							ignore "imgUrl"
+					    // ignore "related"
+							// ignore "categories"
+							// ignore "salesRank"
+							// ignore "price"
+							// ignore "title"
+							// ignore "rank"
+							// ignore "brand"
+							// ignore "imgUrl"
 				}
 		}
 
