@@ -42,7 +42,7 @@ Knowledge Discovery and Data Mining, 2015
 ![Alt text](http://i.imgur.com/HvcCyio.png)
 
 #####Click the `real-time` play button to execute. When it finishes, hit the `schema` button at the top right of Studo. It should look something like, give or take an edge:
-![Alt text](http://i.imgur.com/JcuEdj2.png)
+![Alt text](http://i.imgur.com/TF7b3lI.png)
 
 Note, there's plenty of other connections we can make with this dataset. Feel free to explore and play around!
 
@@ -69,26 +69,28 @@ Behold! Data!
 
 Let's make it more interesting...
 
-`g.V().outE('customer_reviewed')`
+`g.V().outE('reviewed')`
 
 ![Alt text](http://i.imgur.com/qHn7lBx.png)
 
-We can now get more clever with our traversals. For example, "Do people who write awesome in their reviews actual rate things as such?"
+We can now has some fun. For example, "How many items have awesome in their description"
 
-`g.V().has('review','summary', Search.tokenRegex('awesome')).values('overall').mean()`
+`g.V().has('Item','description', Search.tokenRegex('awesome')).count()`
 
-Spoiler...Yes they do!
+![Alt text](http://i.imgur.com/q5NFvnC.png)
 
-Using similar logic - which ones are getting reviewed the most?
+Let's traverse outwards and see what we get
 
-`g.V().has('review','summary', Search.tokenRegex('awesome')).groupCount().by("asin")`
+`g.V().has('Item','description', Search.tokenRegex('awesome')).outE().limit(100)`
 
-It looks like 'B000ULAP4U' is on top...what product is that?
+Ooo...Pretty
 
-![Alt text](http://i.imgur.com/zUODNfq.png)
+![Alt text](http://i.imgur.com/zGJJnG2.png)
 
-![Alt text](http://i.imgur.com/Z1MgkWx.png)
+Let's try a simple recommendation style traversal. We'll start at certain 'Customer'. We'll go out to the items he/she's reviewed. Then we come back to find other customers who've also reviewed that product. You can add additional logic, such as 'only positive reviews'.
 
-The Audio Technica M50's - one of the most popular reference/studio headphones. I own 2 pairs myself.
+`g.V().has('Customer', 'customerId', 'A1TMPDQRRJ6MVE').as('customer').out('reviewed').aggregate('asin').in('reviewed').where(neq('customer')).dedup().values('name').limit(10)`
+
+![Alt text](http://i.imgur.com/YSJye4f.png)
 
 *This graph has many more possibilities for edges and connections. Explore and have fun with the dataset!*

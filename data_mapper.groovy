@@ -1,172 +1,139 @@
-//Created by Marc Selwan (marc.selwan@datastax.com) and Shaunak Das at DataStax
-
 config create_schema: false, load_new: false, load_threads: 3
 
-productData = '/path/to/meta.json.gz'
-reviewData = '/path/to/reviews.json.gz'
-questionData = '/path/to/qa.json.gz'
 
-question_data = File.json(questionData).gzip()
+// data file paths
+list_of_review_data_paths = ['/path/to/reviews.json.gz']
+list_of_metadata_paths = ['/path/to/meta.json.gz']
+list_of_q_and_a_data_paths = ['/path/to/qa.json.gz']
 
-meta_data = File.json(productData).gzip().transform{
-	it['key'] = [];
-	if (it.containsKey("asin")){
-		it['key'].add(['asin': it['asin']]);
-	}
-	if (it.containsKey("related")){
-		it['also_bought'] = it['related']['also_bought'];
-		it['also_viewed'] = it['related']['also_viewed'];
-		it['buy_after_viewing'] = it['related']['buy_after_viewing'];
-	}
-	it['SalesRank'] = [];
-	if (it.containsKey("salesRank"))
-		for (key in it['salesRank'].keySet())
-			it['SalesRank'].add(['category': key, 'rank': it['salesRank'][key]]);
-	it['Categories'] = []
-	if (it.containsKey("categories"))
-		for (subarray in it["categories"])
-			for (element in subarray)
-				it['Categories'].add(element);
-	it
+
+// data mapper for our review nested maps
+reviewE = {
+    label 'reviewed'
+    outV 'reviewer', {
+        label 'Customer'
+        key 'customerId'
+    }
+    inV 'asin', {
+        label 'Item'
+        key 'asin'
+    }
+    property 'overall', 'rating'
+    property 'reviewTime', 'timestampAsText'
+    property 'unixReviewTime', 'timestamp'
 }
 
-review_data = File.json(reviewData).gzip().transform{
-    it['edge_keys'] = []
-    it['edge_keys'].add(['asin': it['asin'],
-                         'overall': it['overall'],
-                         //'helpful': it['helpful'], <- problem field
-                         'reviewText': it['reviewText'],
-                         'summary': it['summary'],
-                         'reviewTime': it['reviewTime'],
-												 'reviewerID': it['reviewerID'],
-                         'unixReviewTime': it['unixReviewTime']
-                        ]);
-    it
-	}
-
-
-
-//create customer vertexLabel
-customerV = {
-    label "customer"
-    key "reviewerID"
-
-
-		//customer -(customer_reviewed)-> product
-
-    outE "edge_keys", "customer_reviewed", {
-        vertex "asin", {
-           label "product"
-           key "asin"
-					 //ignore "reviewText"
-					 //ignore "reviewerID"
+// transform and load the review data
+for (path in list_of_review_data_paths){
+    // transforming our review nested maps
+    review_data = File.json(path).gzip().transform{
+        it['reviewer'] = [:];
+        if(it.containsKey('reviewerName')){
+          it['reviewer']['name'] = it['reviewerName'];
+          it.remove('reviewerName');
         }
+        if(it.containsKey('reviewerID')){
+          it['reviewer']['customerId'] = it['reviewerID'];
+            it.remove('reviewerID');
+        }
+        if (it.containsKey('unixReviewTime')) {
+          it['unixReviewTime'] = java.time.Instant.ofEpochSecond((long)it['unixReviewTime'])
+        }
+        it['helpful'] = it['helpful'][1]>0?((float)it['helpful'][0] / (float)it['helpful'][1]):0;
+        it
     }
-
-		//ignore "asin" //asin is the link between customer to product. Think more like an invoice
-    ignore "helpful"
-		ignore "overall"
-		ignore "reviewText"
-		ignore "reviewTime"
-		ignore "summary"
-		ignore "unixReviewTime"
-
+    // load data
+    load(review_data).asEdges(reviewE)
 }
 
-// create product VertexLabel
-productV = {
-    label "product"
-    key "asin"
-    // product -(viewed with)-> Item edge
-    outV "also_viewed", "viewed_with", {
-        label "product"
-        key "asin"
+// data mapper for metadata nested maps
+itemV = {
+    label 'Item'
+    key 'asin'
+    // Item -(viewed_with)-> Item edge
+    outV 'also_viewed', 'viewed_with', {
+        label 'Item'
+        key 'asin'
     }
-    // product -(purchased with)-> Item edge
-    outV "also_bought", "purchased_with", {
-        label "product"
-        key "asin"
+    // Item -(bought_after_viewing)-> Item edge
+    outV 'buy_after_viewing', 'bought_after_viewing', {
+        label 'Item'
+        key 'asin'
     }
-    // product -(bought after viewing)-> Item edge
-    outV "buy_after_viewing", "bought_after_viewing", {
-        label "product"
-        key "asin"
+    // Item -(purchased_with)-> Item edge
+    outV 'bought_together', 'purchased_with', {
+        label 'Item'
+        key 'asin'
     }
-    // product -(belongs_in_category)-> category edge
-    outV "Categories", "belongs_in_category", {
-        label "category"
-        key "categories"
+    // Item -(also_bought)-> Item edge
+    outV 'also_bought', 'also_bought', {
+        label 'Item'
+        key 'asin'
     }
-
-    // product -(has_salesRank)-> category edge
+    // Item -(belongs_in_category)-> Category edge
+    outV 'Categories', 'belongs_in_category', {
+        label 'Category'
+        key 'category', 'name'
+    }
+    // Item -(has_salesRank)-> Category edge
     outE "SalesRank", "has_salesRank", {
         vertex "category", {
-            label "category"
-            key "categories"
+            label "Category"
+            key "category", "name"
         }
     }
-
-
-		outE "key", "has_review", {
-			    vertex "asin", {
-				      label "review"
-				      key "asin"
-					    // ignore "related"
-							// ignore "categories"
-							// ignore "salesRank"
-							// ignore "price"
-							// ignore "title"
-							// ignore "rank"
-							// ignore "brand"
-							// ignore "imgUrl"
-				}
-		}
-
-
-    // these keys can be ignored, since we did appropriate transform on original JSON
-    ignore "related"
-    ignore "categories"
-    ignore "salesRank"
 }
 
-reviewV = {
-    label "review"
-    key "asin"
+// transform and load the metadata
+for (path in list_of_metadata_paths){
+    // transforming our metadata nested maps
+    metadata = File.json(path).gzip().transform{
+        if (it.containsKey("related")){
+            for (key in it['related'].keySet())
+                it[key] = it['related'][key];
+            it.remove('related')
+        }
+        if (it.containsKey("salesRank")){
+            it['SalesRank'] = [];
+            for (key in it['salesRank'].keySet())
+                it['SalesRank'].add(['category': key, 'rank': it['salesRank'][key]]);
+        }
+        if (it.containsKey("categories") && it['categories'][0][0]){
+            it['Categories'] = [];
+            for (subarray in it["categories"]){
+                it['Categories'].add(subarray[0]);
+            }
+        }
+        it.remove('categories');
+        it.remove('salesRank');
+        it
+    }
+    // load data
+    load(metadata).asVertices(itemV)
+}
 
-		// inV "edge_keys", "customer_made", {
-		// 		label "review"
-		// 		key "reviewerID"
-		// }
-
-
-		outE "edge_keys", "made_by", {
-				vertex "reviewerID", {
-					 label "customer"
-					 key "reviewerID"
-					 ignore "reviewText"
-					 ignore "helpful"
-					 ignore "overall"
-					 ignore "reviewText"
-					 ignore "reviewTime"
-					 ignore "summary"
-					 ignore "unixReviewTime"
-				}
-		}
-	}
-
+// data mapper for our qa_data nested maps
 questionV = {
-	  //load property keys in
-    label "question"
-		key "asin"
-    inV "asin", "has_question",{
-        label "product"
+    label "Question"
+    // Item -(has_question)-> Question edge
+    inV "asin", "has_question", {
+        label "Item"
         key "asin"
     }
+    property 'answerTime', 'timestampAsText'
+    property 'unixTime', 'timestamp'
+
 }
 
-
-//time to actually load the data
-load(review_data).asVertices(customerV)
-load(review_data).asVertices(reviewV)
-load(question_data).asVertices(questionV)
-load(meta_data).asVertices(productV)
+// transform and load the Q/A data
+for (path in list_of_q_and_a_data_paths){
+    // no need to transform our qa nested maps
+    q_and_a_data = File.json(path).gzip().transform {
+      if (it.containsKey('unixTime')) {
+        it['unixTime'] = java.time.Instant.ofEpochSecond((long)it['unixTime'])
+      }
+      it
+    }
+    // load data
+    load(q_and_a_data).asVertices(questionV)
+}

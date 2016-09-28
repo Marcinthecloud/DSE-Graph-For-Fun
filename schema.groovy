@@ -1,85 +1,56 @@
-//Define our propertyKeys
+schema.config().option('graph.schema_mode').set('Development')
+
+
 schema.propertyKey("summary").Text().single().create()
-schema.propertyKey("reviewerID").Text().single().create()
-schema.propertyKey("unixReviewTime").Int().single().create()
+schema.propertyKey("timestampAsText").Text().single().create()
+schema.propertyKey("question").Text().single().create()
+schema.propertyKey("answerType").Text().single().create()
+schema.propertyKey("rating").Double().single().create()
+schema.propertyKey("description").Text().single().create()
 schema.propertyKey("title").Text().single().create()
 schema.propertyKey("imUrl").Text().single().create()
-schema.propertyKey("reviewerName").Text().single().create()
-schema.propertyKey("price").Double().single().create()
-schema.propertyKey("rank").Int().single().create()
-schema.propertyKey("overall").Double().single().create()
-schema.propertyKey("asin").Text().single().create()
-schema.propertyKey("categories").Text().single().create()
-schema.propertyKey("helpful").Int().single().create()
-schema.propertyKey("reviewText").Text().single().create()
-schema.propertyKey("reviewTime").Text().single().create()
-schema.propertyKey("description").type(java.lang.String).single().create()
-schema.propertyKey("brand").type(java.lang.String).single().create()
-schema.propertyKey("questionType").Text().single().create()
-schema.propertyKey("answerType").Text().single().create()
-schema.propertyKey("answerTime").Text().single().create()
-schema.propertyKey("unixTime").Timestamp().single().create()
-schema.propertyKey("question").Text().single().create()
 schema.propertyKey("answer").Text().single().create()
-
-//Define our Vertexes
-
-schema.vertexLabel("question").properties("asin", "questionType", "answerType", "answerTime", "unixTime", "question", "answer").create()
-
-schema.vertexLabel("product").properties("title", "imUrl", "price", "asin", "brand", "description").create()
-schema.vertexLabel("review").properties("unixReviewTime", "reviewerName", "overall", "asin", "helpful", "reviewText", "reviewTime", "summary", "reviewerID").create()
-
-schema.vertexLabel("category").properties("categories").create()
-schema.vertexLabel("customer").properties("reviewerID", "reviewerName", "asin").create()
-
-
-
-//Define our edges
-
-//customer -(customer_reviewed)-> product
-schema.edgeLabel("customer_reviewed").multiple().properties("unixReviewTime", "reviewerName", "overall", "asin", "helpful", "reviewText", "reviewTime", "summary", "reviewerID").create()
-schema.edgeLabel("customer_reviewed").connection("customer", "product").add()
-
-//review -(made_by)-> customer
-schema.edgeLabel('made_by').properties('reviewerID').connection('review', 'customer').create()
-
-//product -(belongs_in_category)-> category
+schema.propertyKey("price").Double().single().create()
+schema.propertyKey("name").Text().single().create()
+schema.propertyKey("customerId").Text().single().create()
+schema.propertyKey("rank").Int().single().create()
+schema.propertyKey("asin").Text().single().create()
+schema.propertyKey("helpful").Double().single().create()
+schema.propertyKey("brand").Text().single().create()
+schema.propertyKey("questionType").Text().single().create()
+schema.propertyKey("reviewText").Text().single().create()
+schema.propertyKey("timestamp").Timestamp().single().create()
+schema.edgeLabel("viewed_with").multiple().create()
+schema.edgeLabel("also_bought").multiple().create()
+schema.edgeLabel("has_question").multiple().create()
+schema.edgeLabel("reviewed").multiple().properties("rating", "helpful", "summary", "reviewText", "timestampAsText", "timestamp").create()
+schema.edgeLabel("purchased_with").multiple().create()
 schema.edgeLabel("belongs_in_category").multiple().create()
-schema.edgeLabel("belongs_in_category").connection("product", "category").add()
+schema.edgeLabel("has_salesRank").multiple().properties("rank").create()
+schema.edgeLabel("bought_after_viewing").multiple().create()
+schema.vertexLabel("Item").properties("description", "title", "imUrl", "price", "asin", "brand").create()
+schema.vertexLabel("Item").index("byasin").materialized().by("asin").add()
+schema.vertexLabel("Category").properties("name").create()
+schema.vertexLabel("Category").index("byname").materialized().by("name").add()
+schema.vertexLabel("Customer").properties("name", "customerId").create()
+schema.vertexLabel("Customer").index("bycustomerId").materialized().by("customerId").add()
+schema.vertexLabel("Question").properties("answerType", "answer", "questionType", "timestampAsText", "question", "timestamp").create()
+schema.edgeLabel("viewed_with").connection("Item", "Item").add()
+schema.edgeLabel("also_bought").connection("Item", "Item").add()
+schema.edgeLabel("has_question").connection("Item", "Question").add()
+schema.edgeLabel("reviewed").connection("Customer", "Item").add()
+schema.edgeLabel("purchased_with").connection("Item", "Item").add()
+schema.edgeLabel("belongs_in_category").connection("Item", "Category").add()
+schema.edgeLabel("has_salesRank").connection("Item", "Category").add()
+schema.edgeLabel("bought_after_viewing").connection("Item", "Item").add()
+schema.vertexLabel("Item").index("byBrand").materialized().by("brand").add()
+schema.vertexLabel('Customer').index('byName').materialized().by('name').add()
 
-//product -(has_question)->question
-schema.edgeLabel('has_question').properties('asin').connection('product', 'question').create()
+schema.vertexLabel("Customer").index("reviewsByTime").outE("reviewed").by("timestamp").add();
+schema.vertexLabel('Item').index('byCustomerRating').inE('reviewed').by('rating').add()
+schema.vertexLabel('Item').index('byReviewTimestamp').inE('reviewed').by('timestamp').add()
+schema.vertexLabel('Category').index('byItemSalesRank').inE('has_salesRank').by('rank').add()
 
-//product -(purchased_with)-> product
-schema.edgeLabel('purchased_with').connection('product', 'product').create()
-
-//product -(viewed_with)-> product
-schema.edgeLabel('viewed_with').connection('product', 'product').create()
-
-//product -(has_salesRank)-> category
-schema.edgeLabel("has_salesRank").multiple().create()
-schema.edgeLabel("has_salesRank").connection("product", "category").add()
-schema.edgeLabel('has_salesRank').properties('rank').add()
-
-//product -(has_review)-> reivew
-schema.edgeLabel("has_review").multiple().properties("asin").create()
-schema.edgeLabel('has_review').connection('product', 'review').add()
-
-
-//product -(bought_after_viewing)-> product
-schema.edgeLabel('bought_after_viewing').connection('product', 'product').create()
-
-
-
-//Define our MV indexes for performance
-schema.vertexLabel("product").index("byasin").materialized().by("asin").add()
-schema.vertexLabel("review").index("byasin").materialized().by("asin").add()
-schema.vertexLabel("category").index("bycategories").materialized().by("categories").add()
-schema.vertexLabel("review").index("byreviewerID").materialized().by("reviewerID").add()
-schema.vertexLabel('customer').index('byreviewerID').materialized().by('reviewerID').add()
-schema.vertexLabel('question').index('byasin').materialized().by('asin').add()
-schema.vertexLabel('customer').index('byasin').materialized().by('asin').add()
-
-//Define our Search indexes for flexability
-schema.vertexLabel('review').index('search').search().by('reviewText').asText().by('summary').asText().by('reviewerName').asString().add()
-schema.vertexLabel('question').index('search').search().by('question').asText().by('answer').asText().add()
+schema.vertexLabel('Item').index('search').search().by('title').asText().by('description').asText().by('price').add()
+schema.vertexLabel('Category').index('search').search().by('name').asText().add()
+schema.vertexLabel("Question").index("search").search().by("question").asText().by("answer").asText().by("answerType").asString().add();
